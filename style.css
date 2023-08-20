@@ -1,6 +1,7 @@
-*{
+* {
     margin: 0%;
     padding: 0%;
+
 }
 
 
@@ -10,31 +11,32 @@
 
 
 
-.main-signup{
+.main-signup {
     height: 100vh;
     width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
-    
-}
-.heading{
-font-weight: 700;
-color: #0071e2;
+
 }
 
-.card-on{
+.heading {
+    font-weight: 700;
+    color: #0071e2;
+}
+
+.card-on {
     width: 350px;
     box-shadow: rgba(50, 50, 93, 0.12) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;
 }
 
-.sigup-btn{
+.sigup-btn {
     margin-top: 10px;
- text-align: center;
+    text-align: center;
 }
 
 
-.text{
+.text {
     text-align: center;
     font-size: 15px;
     opacity: 0.8;
@@ -45,24 +47,16 @@ color: #0071e2;
 
 
 
+.my-nav {
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px;
+    margin-bottom: 50px;
+   
+    ;
 
 
-
-
-
-
-
-
-
-
-
-
-.my-nav{
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px;
-    
 }
 
-.cantainer-top{
+.cantainer-top {
     width: 100%;
     height: 200px;
     background-color: rgb(241, 241, 240);
@@ -70,7 +64,8 @@ color: #0071e2;
 
 
 
-.dashboard{
+.dashboard {
+    margin-top: 50px;
     height: 450px;
     width: 100%;
     display: flex;
@@ -80,49 +75,50 @@ color: #0071e2;
 }
 
 
-.card-main{
-    border: none !important;
-}
 
-.card-body{
+
+.card-body {
     text-align: left;
 }
 
-.input-sec{
+.input-sec {
     width: 500px;
-    
-}
-.blog-sec{
-    height: 450px;;
-    width: 600px;
-    margin-top: 1rem;
-    
-  
-    margin: 0 auto;
-   
+
 }
 
-.btn-sec{
+.blog-sec {
+    height: 450px;
+    ;
+    width: 600px;
+    margin-top: 1rem;
+
+
+    margin: 0 auto;
+
+}
+
+.btn-sec {
     display: flex;
 }
 
 
 
 
-.main .profile-top{
+.main .profile-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    
-  }
- 
 
-  
+}
 
-  .user-picture>img {
+
+
+
+.user-picture>img {
     width: 100px;
     height: 100px;
-   
+    border-radius: 50%;
+
 }
 
 .user-picture {
@@ -149,7 +145,7 @@ color: #0071e2;
 }
 
 
-    
+
 .loader {
     display: none;
     --height-of-loader: 4px;
@@ -157,12 +153,12 @@ color: #0071e2;
     width: 100%;
     height: var(--height-of-loader);
     border-radius: 30px;
-    background-color: rgba(0,0,0,0.2);
+    background-color: rgba(0, 0, 0, 0.2);
     position: relative;
     margin-top: 0.5rem;
-  }
-  
-  .loader::before {
+}
+
+.loader::before {
     content: "";
     position: absolute;
     background: var(--loader-color);
@@ -173,22 +169,55 @@ color: #0071e2;
     border-radius: 30px;
     animation: moving 1s ease-in-out infinite;
     ;
-  }
-  
-  @keyframes moving {
-    50% {
-      width: 100%;
-    }
-  
-    100% {
-      width: 0;
-      right: 0;
-      left: unset;
-    }
-  }
+}
 
-  .user-picture>img {
-    width: 100px;
-    height: 100px;
-    border-radius: 50px;
+@keyframes moving {
+    50% {
+        width: 100%;
+    }
+
+    100% {
+        width: 0;
+        right: 0;
+        left: unset;
+    }
+}
+
+
+#navbarText>span button {
+    display: none;
+
+}
+
+.UserName {
+    display: none;
+    font-size: 24px;
+    border: none;
+
+
+}
+
+
+.user-profile {
+    width: 150px;
+    margin: 0% auto;
+    position: relative;
+}
+
+.user-profile>img {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+}
+
+
+.Post-Sec {
+    display: flex;
+    justify-content: center;
+}
+
+.userImg {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
 }

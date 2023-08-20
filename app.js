@@ -130,9 +130,8 @@ signupBtn && signupBtn.addEventListener("click", async () => {
 
         });
 
-        //  localStorage.setItem("userId",user.uid ,)
+
         location.href = "login.html"
-        // console.log("Document written with ID: ", docRef.id);
         console.log("added")
       } catch (e) {
         console.error("Error adding document: ", e);
@@ -185,11 +184,10 @@ loginBtn && loginBtn.addEventListener("click", () => {
 const defaultImg = `images/user.png`
 
 
-
+let profile = document.getElementById("profile")
 let getUser = async (uid) => {
   let fullName = document.getElementById("fullName");
   let email = document.getElementById("email");
-
   const docRef = await doc(db, "users", uid);
   const docSnap = await getDoc(docRef);
 
@@ -200,14 +198,9 @@ let getUser = async (uid) => {
     fullName.value = docSnap.data().user
     email.value = docSnap.data().email
 
+    profile_img.src = docSnap.data().picture ? docSnap.data().picture : defaultImg
 
-    if (docSnap.data().picture) {
 
-      profile_img.src = docSnap.data().picture
-    }
-    else {
-      profile_img.src = defaultImg
-    }
 
   }
 
@@ -217,88 +210,103 @@ let getUser = async (uid) => {
   }
 
 }
+
+
+let logout = document.getElementById("logout-btn")
+let postBtn = document.getElementById("postBtn")
 onAuthStateChanged(auth, (user) => {
   const uid = localStorage.getItem("uid")
+  let fullName = document.getElementById("fullName");
+
   if (user && uid) {
-
-    getUser(user.uid)
+    logout.style.display = "block"
+    fullName.style.display = "block"
+    
+    
+    getUser(uid)
+    postBtn.removeAttribute('disabled')
     if (location.pathname !== '/profile.html' && location.pathname !== '/index.html') {
-      location.href = "profile.html"
-    }
-    //   } else {
-    //       if (location.pathname !== '/index.html' && location.pathname !== '/signup.html' ) {
-    //           location.href = "index.html"
-    //       }
-    //   }
-    // });
-  }
-  const logoutBtn = document.getElementById("logout-btn")
-
-  logoutBtn && logoutBtn.addEventListener('click', () => {
-    signOut(auth).then(() => {
-      localStorage.clear()
       location.href = "index.html"
-    }).catch((error) => {
-      // An error happened.
-    });
+      
 
-  })
+    }
+
+    else {
+      // if (location.pathname !== '/index.html' && location.pathname !== '/profile.html' ) {
+      //     location.href = "index.html"
+      // }
+    }
+  }
+  else {
+    let login = document.getElementById("login")
+    let singUp = document.getElementById("signUp")
+    
+    if (location.pathname === '/index.html') {
+      fullName.style.display = "none"
+      login.style.display = "block"
+      singUp.style.display = "block"
+    }
+
+    if (location.pathname !== '/login.html' && location.pathname !== '/index.html' && location.pathname !== '/signup.html') {
+      location.href = "index.html"
+
+    }
+  }
+
+});
+const logoutBtn = document.getElementById("logout-btn")
+
+logoutBtn && logoutBtn.addEventListener('click', () => {
+  signOut(auth).then(() => {
+    localStorage.clear()
+    location.href = "index.html"
+  }).catch((error) => {
+    // An error happened.
+  });
 
 })
 
 
 
-let Post = () => {
+
+
+let Post = async () => {
+  let uid = localStorage.getItem("uid")
+  const docRef2 = await doc(db, "users", uid);
+  const docSnap = await getDoc(docRef2);
+
+  if (docSnap.exists()) {
+    console.log("Document data:", docSnap.data())
+  }
+
+  else {
+    // docSnap.data() will be undefined in this case
+    console.log("No such document!");
+  }
+
+  console.log("Document data:", docSnap.data())
   let title = document.getElementById("title")
   let text = document.getElementById("text")
 
-  const docRef = addDoc(collection(db, "Post"), {
-    title: title.value,
-    text: text.value,
-  });
-  console.log("Document written with ID: ", docRef.id);
+  if ( title.value.length >5 &&  text.value.length >100 ){
+    const docRef = addDoc(collection(db, "Post"), {
+      title: title.value,
+      text: text.value,
+      picture: docSnap.data().picture,
+      Uname: docSnap.data().user,
+      email: docSnap.data().email,
+      timestamp: serverTimestamp(),
+      
+    });
+    console.log("Document written with ID: ", docRef.id);
+  }
+else{
+  alert("Please make sure that the title is between 5 and 50 characters, the text is between 100 and 3000 characters, and both fields are filled in.");
 
+}
 }
 
 window.Post = Post
-
-
-
-
-let getPost = () => {
-  let postSec = document.getElementById("Post-Sec");
-
-  const q = query(collection(db, "Post"));
-  const unsubscribe = onSnapshot(q, (querySnapshot) => {
-    const posts = [];
-    querySnapshot.forEach((doc) => {
-   
-     
-
-        posts.push(doc.data());
-        postSec.innerHTML += `
-      <div class="card text-center" >
-      <h2 class="card-header">
-      Blog
-      </h2>
-      <div class="card-body">
-      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQuS4q9gPpC3J0mYiARB4gNfrwx3QHNglobOpDduKih&s" alt="">
-      <h5 class="card-title"> ${doc.data().title}</h5>
-      <p class="card-text input-sec">${doc.data().text}</p>
-        <a href="#" class="btn btn-danger">Delete</a>
-        <a href="#" class="btn btn-secondary">Edit</a>
-      </div>
-      <div class="card-footer text-body-secondary">
-      2 days ago
-      </div>
-      </div>
-      `
-      
-    });
-
-  });
-}
-getPost()
 
 let getAllUser = () => {
   let postSecAll = document.getElementById("Post-Sec-All");
@@ -307,26 +315,33 @@ let getAllUser = () => {
     const posts = [];
     querySnapshot.forEach((doc) => {
       posts.push(doc.data());
-      for (var i = 0; i < posts.length; i++){
 
-        postSecAll.innerHTML += `
+
+      postSecAll.innerHTML += `
         <div class="card text-center">
       <h2 class="card-header">
         Blog
         </h2>
-        <div class="card-body">
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQuS4q9gPpC3J0mYiARB4gNfrwx3QHNglobOpDduKih&s" alt="">
-        <h5 class="card-title">${doc.data().title[i]}</h5>
-        <p class="card-text input-sec">${doc.data().text[i]}</p>
+        <div class="card-body mb-2">
+        <div class="d-flex align-items-center">
+        <img class="userImg" src="${doc.data().picture ? doc.data().picture : defaultImg}" alt="" >
+        <div>
+        <h2>${doc.data().Uname}</h2>
+        <h5>${doc.data().email}</h5>
+        </div>
+        </div>
+        <div/>
+        <h5 class="card-title">${doc.data().title}</h5>
+        <p class="card-text input-sec">${doc.data().text}</p>
        <span class="">12-23-2002</span>
        </div>
        
        </div>
        `
-      }
-      });
 
     });
+
+  });
 }
 
 getAllUser()
