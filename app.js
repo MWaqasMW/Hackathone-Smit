@@ -114,23 +114,23 @@ signupBtn && signupBtn.addEventListener("click", async () => {
   }
 
 
-
+  
+  if(user.value.length >= 3  && typeof(user.value) === "string"  ){
   showloder() || createUserWithEmailAndPassword(auth, userData.email, userData.password)
 
+
     .then(async (userCredential) => {
-
       const user = userCredential.user;
-
       try {
         await setDoc(doc(db, "users", user.uid), {
           ...userData,
           uid: user.uid,
-
-
-
+          
+          
+          
         });
-
-
+        
+        
         location.href = "login.html"
         console.log("added")
       } catch (e) {
@@ -144,8 +144,12 @@ signupBtn && signupBtn.addEventListener("click", async () => {
       const errorMessage = error.message;
       sweetAlert("Oops...", error.message, "error");
     })
-
-})
+    
+  }
+  else{
+    sweetAlert("Oops...","Please User name must be 3 charcter and alphabatic this field must full file ", "error");
+  }
+  })
 
 
 let loginBtn = document.getElementById("loginBtn")
@@ -181,24 +185,27 @@ loginBtn && loginBtn.addEventListener("click", () => {
 })
 
 
-const defaultImg = `images/user.png`
 
 
 let profile = document.getElementById("profile")
 let getUser = async (uid) => {
+const defaultImg = `images/user.png`
   let fullName = document.getElementById("fullName");
   let email = document.getElementById("email");
   const docRef = await doc(db, "users", uid);
   const docSnap = await getDoc(docRef);
-
+console.log(docSnap.exists())
   if (docSnap.exists()) {
 
     console.log("Document data:", docSnap.data().email);
 
     fullName.value = docSnap.data().user
-    email.value = docSnap.data().email
+    if(location.href === "profile.html"  ){
+      email.value = docSnap.data().email
 
-    profile_img.src = docSnap.data().picture ? docSnap.data().picture : defaultImg
+      profile_img.src = docSnap.data().picture ? docSnap.data().picture : defaultImg
+    }
+      
 
 
 
@@ -224,7 +231,10 @@ onAuthStateChanged(auth, (user) => {
     
     
     getUser(uid)
-    postBtn.removeAttribute('disabled')
+    if(location.pathname == '/index.html'){
+
+      postBtn.removeAttribute('disabled')
+    }
     if (location.pathname !== '/profile.html' && location.pathname !== '/index.html') {
       location.href = "index.html"
       
@@ -241,7 +251,7 @@ onAuthStateChanged(auth, (user) => {
     let login = document.getElementById("login")
     let singUp = document.getElementById("signUp")
     
-    if (location.pathname === '/index.html') {
+    if (location.pathname === '/index.html'  ) {
       fullName.style.display = "none"
       login.style.display = "block"
       singUp.style.display = "block"
@@ -288,7 +298,7 @@ let Post = async () => {
   let title = document.getElementById("title")
   let text = document.getElementById("text")
 
-  if ( title.value.length >5 &&  text.value.length >100 ){
+  if ( title.value.length >= 5 &&  text.value.length >= 100 ){
     const docRef = addDoc(collection(db, "Post"), {
       title: title.value,
       text: text.value,
@@ -309,39 +319,60 @@ else{
 window.Post = Post
 
 let getAllUser = () => {
-  let postSecAll = document.getElementById("Post-Sec-All");
+
+    
+    let postSecAll = document.getElementById("Post-Sec-All");
+    const defaultImg = `images/user.png`
   const q = query(collection(db, "Post"));
   const unsubscribe = onSnapshot(q, (querySnapshot) => {
     const posts = [];
     querySnapshot.forEach((doc) => {
       posts.push(doc.data());
+      
 
 
-      postSecAll.innerHTML += `
-        <div class="card text-center">
-      <h2 class="card-header">
-        Blog
-        </h2>
-        <div class="card-body mb-2">
-        <div class="d-flex align-items-center">
-        <img class="userImg" src="${doc.data().picture ? doc.data().picture : defaultImg}" alt="" >
-        <div>
+if(location.pathname === '/index.html'){
+
+  let time = doc.data().timestamp ? moment(doc.data().timestamp.toDate()).fromNow() : moment().fromNow()
+  
+  
+  postSecAll.innerHTML += `
+  <div class="card text-center m-2">
+  <h2 class="card-header">
+      Blog
+      </h2>
+      <div class="card-body mb-2">
+      <div class="d-flex align-items-center">
+      <img class="userImg" src="${doc.data().picture ? doc.data().picture : defaultImg}" alt="" width="30px" >
+      <div>
         <h2>${doc.data().Uname}</h2>
         <h5>${doc.data().email}</h5>
         </div>
         </div>
         <div/>
-        <h5 class="card-title">${doc.data().title}</h5>
-        <p class="card-text input-sec">${doc.data().text}</p>
-       <span class="">12-23-2002</span>
-       </div>
-       
-       </div>
-       `
+        <hr>
+        <h2 class="">${doc.data().title}</h2>
+        <p class="card-text">${doc.data().text}</p>
+        <span class="fs-5">${time}</span>
+        </div>
+        
+        </div>
+        `
+      }
+      else{
+        if(location.pathname === '/profile.html'){
 
+          email.value = doc.data().email
+          profile_img.src = doc.data().picture ? doc.data().picture : defaultImg
+        }
+      }
+        
+        
+        
+      });
+      
     });
-
-  });
-}
-
-getAllUser()
+  }
+  
+  
+  getAllUser()
