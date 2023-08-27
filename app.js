@@ -1,6 +1,6 @@
 
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js";
-import { doc, setDoc, getDoc, updateDoc, addDoc, collection, query, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js";
+import { doc, setDoc, getDoc, updateDoc, addDoc, collection, query, onSnapshot, serverTimestamp ,orderBy} from "https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytesResumable, getDownloadURL, } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-storage.js";
 import { db, auth } from './firebase.js'
 
@@ -286,19 +286,12 @@ let Post = async () => {
   const docSnap = await getDoc(docRef2);
 
   if (docSnap.exists()) {
-    console.log("Document data:", docSnap.data())
-  }
-
-  else {
-    // docSnap.data() will be undefined in this case
-    console.log("No such document!");
-  }
-
+    
   console.log("Document data:", docSnap.data())
   let title = document.getElementById("title")
   let text = document.getElementById("text")
 
-  if ( title.value.length >= 5 &&  text.value.length >= 100 ){
+  if ( title.value.length >= 5 &&  text.value.length >= 1 ){
     const docRef = addDoc(collection(db, "Post"), {
       title: title.value,
       text: text.value,
@@ -309,70 +302,76 @@ let Post = async () => {
       
     });
     console.log("Document written with ID: ", docRef.id);
+    title.value =""
+    text.value=""
   }
 else{
   alert("Please make sure that the title is between 5 and 50 characters, the text is between 100 and 3000 characters, and both fields are filled in.");
 
 }
+  }
+
+  else {
+    // docSnap.data() will be undefined in this case
+    console.log("No such document!");
+  }
 }
 
 window.Post = Post
-
+let postSecAll = document.getElementById("Post-Sec-All");
+postSecAll.innerHTML = ''
 let getAllUser = () => {
-
-    
-    let postSecAll = document.getElementById("Post-Sec-All");
-    const defaultImg = `images/user.png`
-  const q = query(collection(db, "Post"));
-  const unsubscribe = onSnapshot(q, (querySnapshot) => {
-    const posts = [];
-    querySnapshot.forEach((doc) => {
-      posts.push(doc.data());
-      
-
-
-if(location.pathname === '/index.html'){
-
-  let time = doc.data().timestamp ? moment(doc.data().timestamp.toDate()).fromNow() : moment().fromNow()
   
   
-  postSecAll.innerHTML += `
-  <div class="card text-center m-2">
-  <h2 class="card-header">
-      Blog
-      </h2>
+  const defaultImg = `images/user.png`
+  const q = query(collection(db, "Post"), orderBy("timestamp","desc"));
+const unsubscribe = onSnapshot(q, (querySnapshot) => {
+  postSecAll.innerHTML = ''; // Clear existing content before adding new posts
+
+  querySnapshot.forEach((doc) => {
+    if(location.pathname === '/index.html'){
+    let time = doc.data().timestamp ? moment(doc.data().timestamp.toDate()).fromNow(): moment().fromNow();
+
+    const postContainer = document.createElement("div");
+    postContainer.classList.add("card", "text-center", "m-2");
+    postContainer.innerHTML = `
+      <h2 class="card-header">Blog</h2>
       <div class="card-body mb-2">
-      <div class="d-flex align-items-center">
-      <img class="userImg" src="${doc.data().picture ? doc.data().picture : defaultImg}" alt="" width="30px" >
-      <div>
-        <h2>${doc.data().Uname}</h2>
-        <h5>${doc.data().email}</h5>
-        </div>
+        <div class="d-flex align-items-center">
+          <img class="userImg" src="${
+            doc.data().picture ? doc.data().picture : defaultImg
+          }" alt="" width="30px">
+          <div>
+            <h2>${doc.data().Uname}</h2>
+            <h5>${doc.data().email}</h5>
+          </div>
         </div>
         <div/>
         <hr>
-        <h2 class="">${doc.data().title}</h2>
+        <h2 >${doc.data().title}</h2>
+        <br>
         <p class="card-text">${doc.data().text}</p>
-        <span class="fs-5">${time}</span>
-        </div>
-        
-        </div>
-        `
+<br>
+<hr>
+       
+        <span class="fw-bold mx-2">${time}</span>
+      </div>
+    `;
+    postSecAll.appendChild(postContainer);
       }
       else{
-        if(location.pathname === '/profile.html'){
-
-          email.value = doc.data().email
-          profile_img.src = doc.data().picture ? doc.data().picture : defaultImg
+        if (location.pathname === '/profile.html') {
+          const emailElement = document.getElementById("email");
+          const profileImageElement = document.getElementById("profile_img");
+        
+          emailElement.textContent = doc.data().email;
+          profileImageElement.src = doc.data().picture ? doc.data().picture : defaultImg;
         }
+        
       }
-        
-        
-        
-      });
-      
-    });
-  }
+})
   
-  
+})
+} 
+    
   getAllUser()
