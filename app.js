@@ -1,6 +1,6 @@
 
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js";
-import { doc, setDoc, getDoc, updateDoc, addDoc, collection, query, onSnapshot, serverTimestamp ,orderBy} from "https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js";
+import { doc, setDoc, getDoc, updateDoc, addDoc, collection, query, onSnapshot, serverTimestamp ,orderBy,where} from "https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytesResumable, getDownloadURL, } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-storage.js";
 import { db, auth } from './firebase.js'
 
@@ -156,40 +156,40 @@ let loginBtn = document.getElementById("loginBtn")
 loginBtn && loginBtn.addEventListener("click", () => {
   let email = document.getElementById("user-email")
   let password = document.getElementById("password")
-
-
+  
+  
   showloder() || signInWithEmailAndPassword(auth, email.value, password.value)
-    .then((userCredential) => {
-
-      const user = userCredential.user;
-
+  .then((userCredential) => {
+    
+    const user = userCredential.user;
+    
       try {
         location.href = "profile.html"
         localStorage.setItem("uid", user.uid)
       } catch (err) {
         console.log(err)
-
+        
       }
-
+      
       // getUser(user.uid)
       hideloder()
-
-
+      
+      
     })
     .catch((error) => {
       hideloder()
       console.log("error.message", error.message)
       sweetAlert("Oops...", error.message, "error");
     });
-
+    
 })
 
 
 
 
+const defaultImg = `images/user.png`
 let profile = document.getElementById("profile")
 let getUser = async (uid) => {
-const defaultImg = `images/user.png`
   let fullName = document.getElementById("fullName");
   let email = document.getElementById("email");
   const docRef = await doc(db, "users", uid);
@@ -200,22 +200,17 @@ console.log(docSnap.exists())
     console.log("Document data:", docSnap.data().email);
 
     fullName.value = docSnap.data().user
-    if(location.href === "profile.html"  ){
+    if(location.pathname === "/profile.html"){
       email.value = docSnap.data().email
-
       profile_img.src = docSnap.data().picture ? docSnap.data().picture : defaultImg
     }
-      
-
-
-
   }
 
   else {
     // docSnap.data() will be undefined in this case
     console.log("No such document!");
   }
-
+  
 }
 
 
@@ -282,54 +277,55 @@ logoutBtn && logoutBtn.addEventListener('click', () => {
 
 let Post = async () => {
   let uid = localStorage.getItem("uid")
+  console.log(uid)
   const docRef2 = await doc(db, "users", uid);
   const docSnap = await getDoc(docRef2);
-
+  
   if (docSnap.exists()) {
     
-  console.log("Document data:", docSnap.data())
-  let title = document.getElementById("title")
-  let text = document.getElementById("text")
-
-  if ( title.value.length >= 5 &&  text.value.length >= 1 ){
+    console.log("Document data:", docSnap.data())
+    let title = document.getElementById("title")
+    let text = document.getElementById("text")
+    
+    
+    if ( title.value.length >= 5 &&  text.value.length >= 1 ){
     const docRef = addDoc(collection(db, "Post"), {
+      
       title: title.value,
       text: text.value,
-      picture: docSnap.data().picture,
+      picture: docSnap.data().picture ?docSnap.data().picture: defaultImg,
       Uname: docSnap.data().user,
       email: docSnap.data().email,
       timestamp: serverTimestamp(),
+      Id:uid,
       
     });
-    console.log("Document written with ID: ", docRef.id);
     title.value =""
     text.value=""
   }
 else{
   alert("Please make sure that the title is between 5 and 50 characters, the text is between 100 and 3000 characters, and both fields are filled in.");
-
+  
 }
-  }
+}
 
-  else {
-    // docSnap.data() will be undefined in this case
-    console.log("No such document!");
-  }
+else {
+  // docSnap.data() will be undefined in this case
+  console.log("No such document!");
+}
 }
 
 window.Post = Post
 let postSecAll = document.getElementById("Post-Sec-All");
-postSecAll.innerHTML = ''
-let getAllUser = () => {
+let getAllBlogs = () => {
   
   
-  const defaultImg = `images/user.png`
+  if(location.pathname === '/index.html'){
   const q = query(collection(db, "Post"), orderBy("timestamp","desc"));
-const unsubscribe = onSnapshot(q, (querySnapshot) => {
-  postSecAll.innerHTML = ''; // Clear existing content before adding new posts
-
-  querySnapshot.forEach((doc) => {
-    if(location.pathname === '/index.html'){
+  const unsubscribe = onSnapshot(q, (querySnapshot) => {
+    postSecAll.innerHTML = ''; // Clear existing content before adding new posts
+    
+    querySnapshot.forEach((doc) => {
     let time = doc.data().timestamp ? moment(doc.data().timestamp.toDate()).fromNow(): moment().fromNow();
 
     const postContainer = document.createElement("div");
@@ -358,20 +354,98 @@ const unsubscribe = onSnapshot(q, (querySnapshot) => {
       </div>
     `;
     postSecAll.appendChild(postContainer);
-      }
-      else{
-        if (location.pathname === '/profile.html') {
-          const emailElement = document.getElementById("email");
-          const profileImageElement = document.getElementById("profile_img");
-        
-          emailElement.textContent = doc.data().email;
-          profileImageElement.src = doc.data().picture ? doc.data().picture : defaultImg;
-        }
-        
-      }
+    
+  })
 })
+}
+  
+else{
+  // if (location.pathname === '/profile.html') {
+  //   const emailElement = document.getElementById("email");
+  //   const profileImageElement = document.getElementById("profile_img");
+  
+  //   emailElement.textContent = doc.data().email;
+  //   profileImageElement.src = doc.data().picture ? doc.data().picture : defaultImg;
+  // }
+  
+}
+} 
+    
+  getAllBlogs()
+
+
+
+
+
+
+
+
+
+
+let myPostSec = document.getElementById("myPostSec")
+if(location.pathname === "/profile"){
+
+  myPostSec.innerHTML ="";
+  let getCurrentUserBlog = () => {
+let uid = localStorage.getItem("uid")
+    const defaultImg = `images/user.png`
+    console.log(uid)
+    const q = query(collection(db, "Post"), orderBy("timestamp","desc"),where("Id","==",uid))
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      myPostSec.innerHTML = ''; 
+      
+      querySnapshot.forEach((doc) => {
+        if(location.pathname === '/profile.html'){
+          let time = doc.data().timestamp ? moment(doc.data().timestamp.toDate()).fromNow(): moment().fromNow();
+          
+          const postContainer = document.createElement("div");
+      postContainer.classList.add("card", "text-center", "m-2");
+      postContainer.innerHTML = `
+        <h2 class="card-header">Blog</h2>
+        <div class="card-body mb-2">
+        <div class="d-flex align-items-center">
+        <img class="userImg" src="${
+              doc.data().picture ? doc.data().picture : defaultImg
+            }" alt="" width="30px">
+            <div>
+            <h2>${doc.data().Uname}</h2>
+            <h5>${doc.data().email}</h5>
+            </div>
+            </div>
+            <div/>
+            <hr>
+          <h2 >${doc.data().title}</h2>
+          <br>
+          <p class="card-text">${doc.data().text}</p>
+          <br>
+          <hr>
+  <div>
+  <button type="button" class="btn btn-outline-danger">Delet</button>
+  <button type="button" class="btn btn-outline-secondary">Edit</button>
+  </div>
+  <span class="fw-bold mx-2">${time}</span>
+  </div>
+  `;
+  myPostSec.appendChild(postContainer);
+}
+// else{
+  //   if (location.pathname === '/profile.html') {
+    //     const emailElement = document.getElementById("email");
+    //     const profileImageElement = document.getElementById("profile_img");
+    
+    //     emailElement.textContent = doc.data().email;
+    //     profileImageElement.src = doc.data().picture ? doc.data().picture : defaultImg;
+    //   }
+    
+    // }
+  })
   
 })
 } 
-    
-  getAllUser()
+if(location.pathname === "/profile.html"){
+  
+  
+}
+
+getCurrentUserBlog()
+}
