@@ -395,7 +395,6 @@ else{
       
       querySnapshot.forEach((doc) => {
           let time = doc.data().timestamp ? moment(doc.data().timestamp.toDate()).fromNow(): moment().fromNow();
-          console.log(doc.id)
           const postContainer = document.createElement("div");
       postContainer.classList.add("card", "text-center", "m-3");
       postContainer.innerHTML = `
@@ -453,8 +452,7 @@ console.log("doc is deleted")
     window.deletPost =deletPost
   
 
-let docId;
-console.log(docId)
+
 
 
 let hideUpdatePost = document.getElementById("hideUpdatePost");
@@ -467,8 +465,8 @@ hideUpdatePost.addEventListener("click",()=>{
 
 
 
-
-
+let docId;
+console.log(docId)
 const edit=(postId)=>{
   docId =postId;
   
@@ -481,12 +479,19 @@ const edit=(postId)=>{
 window.edit=edit
 
 let updatePost = document.getElementById("updatePost")
- updatePost   && updatePost.addEventListener("click", ()=>{
+ updatePost   && updatePost.addEventListener("click", async()=>{
+console.log(docId)
+let title = document.getElementById("title")
+let text = document.getElementById("text")
+const postRef = doc(db, "Post", docId);
 
-// // Set the "capital" field of the city 'DC'
-// await updateDoc(postRef, {
- 
-// });
+updateSec.style.display="none"
+
+await updateDoc(postRef, {
+  title: title.value,
+  text: text.value
+});
+console.log("Update")
 
     })
 

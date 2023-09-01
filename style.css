@@ -257,3 +257,10 @@ flex-direction: column;
     height: 70px;
     border-radius: 50%;
 }
+
+.spiner{
+    width: 400px;
+    z-index: 1;
+    top: 25%;
+    left: 34%;
+}
