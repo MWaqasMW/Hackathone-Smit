@@ -79,7 +79,6 @@
 
 
 
-
 .card-body {
     text-align: left;
 }
@@ -98,13 +97,14 @@
 .blog-sec {
   
     width: 95%;
-    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+    margin: 0 auto;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
     height:  100vh;
     overflow-y: scroll;
     overflow-x: 0;
     padding: 2rem;
-   margin: 15% auto;
 flex-direction: column;
+
 }
 
 .blog-sec::-webkit-scrollbar{
@@ -241,6 +241,16 @@ flex-direction: column;
     display: flex;
     justify-content: center;
 }
+
+#updateSec{
+    display: none;
+    width: 400px;
+    position: fixed;
+    z-index: 1;
+    top: 25%;
+    left: 34%;
+}
+
 
 .userImg {
     width: 70px;

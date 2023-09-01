@@ -1,6 +1,6 @@
 
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js";
-import { doc, setDoc, getDoc, updateDoc, addDoc, collection, query, onSnapshot, serverTimestamp ,orderBy,where} from "https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js";
+import { doc, setDoc, getDoc, updateDoc, addDoc, collection, query, onSnapshot, serverTimestamp ,orderBy,where, deleteDoc} from "https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytesResumable, getDownloadURL, } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-storage.js";
 import { db, auth } from './firebase.js'
 
@@ -329,9 +329,8 @@ let getAllBlogs = () => {
     let time = doc.data().timestamp ? moment(doc.data().timestamp.toDate()).fromNow(): moment().fromNow();
 
     const postContainer = document.createElement("div");
-    postContainer.classList.add("card", "text-center", "m-2");
+    postContainer.classList.add("card", "text-center", "m-4");
     postContainer.innerHTML = `
-      <h2 class="card-header">Blog</h2>
       <div class="card-body mb-2">
         <div class="d-flex align-items-center">
           <img class="userImg" src="${
@@ -382,30 +381,28 @@ else{
 
 
 
-let myPostSec = document.getElementById("myPostSec")
-if(location.pathname === "/profile"){
 
-  myPostSec.innerHTML ="";
   let getCurrentUserBlog = () => {
-let uid = localStorage.getItem("uid")
+
+    let uid = localStorage.getItem("uid")
     const defaultImg = `images/user.png`
-    console.log(uid)
     const q = query(collection(db, "Post"), orderBy("timestamp","desc"),where("Id","==",uid))
+    if(location.pathname ==="/profile.html"){
+      let myPostSec = document.getElementById("myPostSec")
+      myPostSec.innerHTML ="";
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       myPostSec.innerHTML = ''; 
       
       querySnapshot.forEach((doc) => {
-        if(location.pathname === '/profile.html'){
           let time = doc.data().timestamp ? moment(doc.data().timestamp.toDate()).fromNow(): moment().fromNow();
-          
+          console.log(doc.id)
           const postContainer = document.createElement("div");
-      postContainer.classList.add("card", "text-center", "m-2");
+      postContainer.classList.add("card", "text-center", "m-3");
       postContainer.innerHTML = `
-        <h2 class="card-header">Blog</h2>
-        <div class="card-body mb-2">
+        <div class="card-body mb-3">
         <div class="d-flex align-items-center">
         <img class="userImg" src="${
-              doc.data().picture ? doc.data().picture : defaultImg
+          doc.data().picture ? doc.data().picture : defaultImg
             }" alt="" width="30px">
             <div>
             <h2>${doc.data().Uname}</h2>
@@ -419,33 +416,80 @@ let uid = localStorage.getItem("uid")
           <p class="card-text">${doc.data().text}</p>
           <br>
           <hr>
-  <div>
-  <button type="button" class="btn btn-outline-danger">Delet</button>
-  <button type="button" class="btn btn-outline-secondary">Edit</button>
-  </div>
-  <span class="fw-bold mx-2">${time}</span>
-  </div>
-  `;
-  myPostSec.appendChild(postContainer);
+          <div>
+          <button type="button" onclick="deletPost('${doc.id}')" class="btn btn-outline-danger" id="delet">Delet</button>
+          <button type="button" onclick="edit('${doc.id}')" class="btn btn-outline-secondary" id="edit">Edit</button>
+          </div>
+          <span class="fw-bold mx-2">${time}</span>
+          </div>
+          `;
+          myPostSec.appendChild(postContainer);
+        
+        // else{
+          //   if (location.pathname === '/profile.html') {
+            //     const emailElement = document.getElementById("email");
+            //     const profileImageElement = document.getElementById("profile_img");
+            
+            //     emailElement.textContent = doc.data().email;
+            //     profileImageElement.src = doc.data().picture ? doc.data().picture : defaultImg;
+            //   }
+            
+            // }
+          })
+          
+        })
+      } 
+      else{
 }
-// else{
-  //   if (location.pathname === '/profile.html') {
-    //     const emailElement = document.getElementById("email");
-    //     const profileImageElement = document.getElementById("profile_img");
-    
-    //     emailElement.textContent = doc.data().email;
-    //     profileImageElement.src = doc.data().picture ? doc.data().picture : defaultImg;
-    //   }
-    
-    // }
-  })
-  
-})
-} 
-if(location.pathname === "/profile.html"){
-  
-  
 }
 
 getCurrentUserBlog()
+
+    let deletPost=async(postId)=>{
+await deleteDoc(doc(db, "Post", postId));
+console.log("doc is deleted")
+    }
+
+    window.deletPost =deletPost
+  
+
+let docId;
+console.log(docId)
+
+
+let hideUpdatePost = document.getElementById("hideUpdatePost");
+hideUpdatePost.addEventListener("click",()=>{
+  let updateSec= document.getElementById("updateSec")
+  updateSec.style.display="none"
+  document.getElementById("delet").disabled = false;
+  document.getElementById("edit").disabled = false;
+})
+
+
+
+
+
+const edit=(postId)=>{
+  docId =postId;
+  
+  let updateSec= document.getElementById("updateSec")
+  updateSec.style.display="block"
+  document.getElementById("delet").disabled = true;
+  document.getElementById("edit").disabled = true;
 }
+
+window.edit=edit
+
+let updatePost = document.getElementById("updatePost")
+ updatePost   && updatePost.addEventListener("click", ()=>{
+
+// // Set the "capital" field of the city 'DC'
+// await updateDoc(postRef, {
+ 
+// });
+
+    })
+
+  
+
+
