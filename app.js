@@ -1,6 +1,6 @@
 
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js";
-import { doc, setDoc, getDoc, updateDoc, addDoc, collection, query, onSnapshot, serverTimestamp ,orderBy,where, deleteDoc} from "https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js";
+import { doc, setDoc, getDoc, updateDoc, addDoc, collection, query, onSnapshot, serverTimestamp, orderBy, where, deleteDoc } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytesResumable, getDownloadURL, } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-storage.js";
 import { db, auth } from './firebase.js'
 
@@ -114,74 +114,74 @@ signupBtn && signupBtn.addEventListener("click", async () => {
   }
 
 
-  
-  if(user.value.length >= 3  && typeof(user.value) === "string"  ){
-  showloder() || createUserWithEmailAndPassword(auth, userData.email, userData.password)
+
+  if (user.value.length >= 3 && typeof (user.value) === "string") {
+    showloder() || createUserWithEmailAndPassword(auth, userData.email, userData.password)
 
 
-    .then(async (userCredential) => {
-      const user = userCredential.user;
-      try {
-        await setDoc(doc(db, "users", user.uid), {
-          ...userData,
-          uid: user.uid,
-          
-          
-          
-        });
-        
-        
-        location.href = "login.html"
-        console.log("added")
-      } catch (e) {
-        console.error("Error adding document: ", e);
+      .then(async (userCredential) => {
+        const user = userCredential.user;
+        try {
+          await setDoc(doc(db, "users", user.uid), {
+            ...userData,
+            uid: user.uid,
+
+
+
+          });
+
+
+          location.href = "login.html"
+          console.log("added")
+        } catch (e) {
+          console.error("Error adding document: ", e);
+          sweetAlert("Oops...", error.message, "error");
+        }
+        hideloder()
+      })
+      .catch((error) => {
+        hideloder()
+        const errorMessage = error.message;
         sweetAlert("Oops...", error.message, "error");
-      }
-      hideloder()
-    })
-    .catch((error) => {
-      hideloder()
-      const errorMessage = error.message;
-      sweetAlert("Oops...", error.message, "error");
-    })
-    
+      })
+
   }
-  else{
-    sweetAlert("Oops...","Please User name must be 3 charcter and alphabatic this field must full file ", "error");
+  else {
+    sweetAlert("Oops...", "Please User name must be 3 charcter and alphabatic this field must full file ", "error");
   }
-  })
+})
 
 
 let loginBtn = document.getElementById("loginBtn")
 loginBtn && loginBtn.addEventListener("click", () => {
   let email = document.getElementById("user-email")
   let password = document.getElementById("password")
-  
-  
+
+
   showloder() || signInWithEmailAndPassword(auth, email.value, password.value)
-  .then((userCredential) => {
-    
-    const user = userCredential.user;
-    
+    .then((userCredential) => {
+
+      const user = userCredential.user;
+
       try {
         location.href = "profile.html"
         localStorage.setItem("uid", user.uid)
       } catch (err) {
         console.log(err)
-        
+
       }
-      
+
       // getUser(user.uid)
       hideloder()
-      
-      
+
+
     })
     .catch((error) => {
       hideloder()
       console.log("error.message", error.message)
       sweetAlert("Oops...", error.message, "error");
     });
-    
+
 })
 
 
@@ -194,13 +194,13 @@ let getUser = async (uid) => {
   let email = document.getElementById("email");
   const docRef = await doc(db, "users", uid);
   const docSnap = await getDoc(docRef);
-console.log(docSnap.exists())
+  console.log(docSnap.exists())
   if (docSnap.exists()) {
 
     console.log("Document data:", docSnap.data().email);
 
     fullName.value = docSnap.data().user
-    if(location.pathname === "/profile.html"){
+    if (location.pathname === "/profile.html") {
       email.value = docSnap.data().email
       profile_img.src = docSnap.data().picture ? docSnap.data().picture : defaultImg
     }
@@ -210,7 +210,7 @@ console.log(docSnap.exists())
     // docSnap.data() will be undefined in this case
     console.log("No such document!");
   }
-  
+
 }
 
 
@@ -223,16 +223,16 @@ onAuthStateChanged(auth, (user) => {
   if (user && uid) {
     logout.style.display = "block"
     fullName.style.display = "block"
-    
-    
+
+
     getUser(uid)
-    if(location.pathname == '/index.html'){
+    if (location.pathname == '/index.html') {
 
       postBtn.removeAttribute('disabled')
     }
     if (location.pathname !== '/profile.html' && location.pathname !== '/index.html') {
       location.href = "index.html"
-      
+
 
     }
 
@@ -245,8 +245,8 @@ onAuthStateChanged(auth, (user) => {
   else {
     let login = document.getElementById("login")
     let singUp = document.getElementById("signUp")
-    
-    if (location.pathname === '/index.html'  ) {
+
+    if (location.pathname === '/index.html') {
       fullName.style.display = "none"
       login.style.display = "block"
       singUp.style.display = "block"
@@ -280,61 +280,60 @@ let Post = async () => {
   console.log(uid)
   const docRef2 = await doc(db, "users", uid);
   const docSnap = await getDoc(docRef2);
-  
+
   if (docSnap.exists()) {
-    
+
     console.log("Document data:", docSnap.data())
     let title = document.getElementById("title")
     let text = document.getElementById("text")
-    
-    
-    if ( title.value.length >= 5 &&  text.value.length >= 1 ){
-    const docRef = addDoc(collection(db, "Post"), {
-      
-      title: title.value,
-      text: text.value,
-      picture: docSnap.data().picture ?docSnap.data().picture: defaultImg,
-      Uname: docSnap.data().user,
-      email: docSnap.data().email,
-      timestamp: serverTimestamp(),
-      Id:uid,
-      
-    });
-    title.value =""
-    text.value=""
-  }
-else{
-  alert("Please make sure that the title is between 5 and 50 characters, the text is between 100 and 3000 characters, and both fields are filled in.");
-  
-}
-}
 
-else {
-  // docSnap.data() will be undefined in this case
-  console.log("No such document!");
-}
+
+    if (title.value.length >= 5 && text.value.length >= 1) {
+      const docRef = addDoc(collection(db, "Post"), {
+
+        title: title.value,
+        text: text.value,
+        picture: docSnap.data().picture ? docSnap.data().picture : defaultImg,
+        Uname: docSnap.data().user,
+        email: docSnap.data().email,
+        timestamp: serverTimestamp(),
+        Id: uid,
+
+      });
+      title.value = ""
+      text.value = ""
+    }
+    else {
+      alert("Please make sure that the title is between 5 and 50 characters, the text is between 100 and 3000 characters, and both fields are filled in.");
+
+    }
+  }
+
+  else {
+    // docSnap.data() will be undefined in this case
+    console.log("No such document!");
+  }
 }
 
 window.Post = Post
 let postSecAll = document.getElementById("Post-Sec-All");
 let getAllBlogs = () => {
-  
-  
-  if(location.pathname === '/index.html'){
-  const q = query(collection(db, "Post"), orderBy("timestamp","desc"));
-  const unsubscribe = onSnapshot(q, (querySnapshot) => {
-    postSecAll.innerHTML = ''; // Clear existing content before adding new posts
-    
-    querySnapshot.forEach((doc) => {
-    let time = doc.data().timestamp ? moment(doc.data().timestamp.toDate()).fromNow(): moment().fromNow();
 
-    const postContainer = document.createElement("div");
-    postContainer.classList.add("card", "text-center", "m-4");
-    postContainer.innerHTML = `
+
+  if (location.pathname === '/index.html') {
+    const q = query(collection(db, "Post"), orderBy("timestamp", "desc"));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      postSecAll.innerHTML = ''; // Clear existing content before adding new posts
+
+      querySnapshot.forEach((doc) => {
+        let time = doc.data().timestamp ? moment(doc.data().timestamp.toDate()).fromNow() : moment().fromNow();
+
+        const postContainer = document.createElement("div");
+        postContainer.classList.add("card", "text-center", "m-4");
+        postContainer.innerHTML = `
       <div class="card-body mb-2">
         <div class="d-flex align-items-center">
-          <img class="userImg" src="${
-            doc.data().picture ? doc.data().picture : defaultImg
+          <img class="userImg" src="${doc.data().picture ? doc.data().picture : defaultImg
           }" alt="" width="30px">
           <div>
             <h2>${doc.data().Uname}</h2>
@@ -352,25 +351,25 @@ let getAllBlogs = () => {
         <span class="fw-bold mx-2">${time}</span>
       </div>
     `;
-    postSecAll.appendChild(postContainer);
-    
-  })
-})
+        postSecAll.appendChild(postContainer);
+
+      })
+    })
+  }
+
+  else {
+    // if (location.pathname === '/profile.html') {
+    //   const emailElement = document.getElementById("email");
+    //   const profileImageElement = document.getElementById("profile_img");
+
+    //   emailElement.textContent = doc.data().email;
+    //   profileImageElement.src = doc.data().picture ? doc.data().picture : defaultImg;
+    // }
+
+  }
 }
-  
-else{
-  // if (location.pathname === '/profile.html') {
-  //   const emailElement = document.getElementById("email");
-  //   const profileImageElement = document.getElementById("profile_img");
-  
-  //   emailElement.textContent = doc.data().email;
-  //   profileImageElement.src = doc.data().picture ? doc.data().picture : defaultImg;
-  // }
-  
-}
-} 
-    
-  getAllBlogs()
+
+getAllBlogs()
 
 
 
@@ -382,27 +381,26 @@ else{
 
 
 
-  let getCurrentUserBlog = () => {
+let getCurrentUserBlog = () => {
 
-    let uid = localStorage.getItem("uid")
-    const defaultImg = `images/user.png`
-    const q = query(collection(db, "Post"), orderBy("timestamp","desc"),where("Id","==",uid))
-    if(location.pathname ==="/profile.html"){
-      let myPostSec = document.getElementById("myPostSec")
-      myPostSec.innerHTML ="";
+  let uid = localStorage.getItem("uid")
+  const defaultImg = `images/user.png`
+  const q = query(collection(db, "Post"), orderBy("timestamp", "desc"), where("Id", "==", uid))
+  if (location.pathname === "/profile.html") {
+    let myPostSec = document.getElementById("myPostSec")
+    myPostSec.innerHTML = "";
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      myPostSec.innerHTML = ''; 
-      
+      myPostSec.innerHTML = '';
+
       querySnapshot.forEach((doc) => {
-          let time = doc.data().timestamp ? moment(doc.data().timestamp.toDate()).fromNow(): moment().fromNow();
-          const postContainer = document.createElement("div");
-      postContainer.classList.add("card", "text-center", "m-3");
-      postContainer.innerHTML = `
+        let time = doc.data().timestamp ? moment(doc.data().timestamp.toDate()).fromNow() : moment().fromNow();
+        const postContainer = document.createElement("div");
+        postContainer.classList.add("card", "text-center", "m-3");
+        postContainer.innerHTML = `
         <div class="card-body mb-3">
         <div class="d-flex align-items-center">
-        <img class="userImg" src="${
-          doc.data().picture ? doc.data().picture : defaultImg
-            }" alt="" width="30px">
+        <img class="userImg" src="${doc.data().picture ? doc.data().picture : defaultImg
+          }" alt="" width="30px">
             <div>
             <h2>${doc.data().Uname}</h2>
             <h5>${doc.data().email}</h5>
@@ -422,43 +420,43 @@ else{
           <span class="fw-bold mx-2">${time}</span>
           </div>
           `;
-          myPostSec.appendChild(postContainer);
-        
+        myPostSec.appendChild(postContainer);
+
         // else{
-          //   if (location.pathname === '/profile.html') {
-            //     const emailElement = document.getElementById("email");
-            //     const profileImageElement = document.getElementById("profile_img");
-            
-            //     emailElement.textContent = doc.data().email;
-            //     profileImageElement.src = doc.data().picture ? doc.data().picture : defaultImg;
-            //   }
-            
-            // }
-          })
-          
-        })
-      } 
-      else{
-}
+        //   if (location.pathname === '/profile.html') {
+        //     const emailElement = document.getElementById("email");
+        //     const profileImageElement = document.getElementById("profile_img");
+
+        //     emailElement.textContent = doc.data().email;
+        //     profileImageElement.src = doc.data().picture ? doc.data().picture : defaultImg;
+        //   }
+
+        // }
+      })
+
+    })
+  }
+  else {
+  }
 }
 
 getCurrentUserBlog()
 
-    let deletPost=async(postId)=>{
-await deleteDoc(doc(db, "Post", postId));
-console.log("doc is deleted")
-    }
+let deletPost = async (postId) => {
+  await deleteDoc(doc(db, "Post", postId));
+  console.log("doc is deleted")
+}
 
-    window.deletPost =deletPost
-  
+window.deletPost = deletPost
+
 
 
 
 
 let hideUpdatePost = document.getElementById("hideUpdatePost");
-hideUpdatePost.addEventListener("click",()=>{
-  let updateSec= document.getElementById("updateSec")
-  updateSec.style.display="none"
+hideUpdatePost.addEventListener("click", () => {
+  let updateSec = document.getElementById("updateSec")
+  updateSec.style.display = "none"
   document.getElementById("delet").disabled = false;
   document.getElementById("edit").disabled = false;
 })
@@ -467,34 +465,34 @@ hideUpdatePost.addEventListener("click",()=>{
 
 let docId;
 console.log(docId)
-const edit=(postId)=>{
-  docId =postId;
-  
-  let updateSec= document.getElementById("updateSec")
-  updateSec.style.display="block"
+const edit = (postId) => {
+  docId = postId;
+
+  let updateSec = document.getElementById("updateSec")
+  updateSec.style.display = "block"
   document.getElementById("delet").disabled = true;
   document.getElementById("edit").disabled = true;
 }
 
-window.edit=edit
+window.edit = edit
 
 let updatePost = document.getElementById("updatePost")
- updatePost   && updatePost.addEventListener("click", async()=>{
-console.log(docId)
-let title = document.getElementById("title")
-let text = document.getElementById("text")
-const postRef = doc(db, "Post", docId);
+updatePost && updatePost.addEventListener("click", async () => {
+  console.log(docId)
+  let title = document.getElementById("title")
+  let text = document.getElementById("text")
+  const postRef = doc(db, "Post", docId);
 
-updateSec.style.display="none"
+  updateSec.style.display = "none"
 
-await updateDoc(postRef, {
-  title: title.value,
-  text: text.value
-});
-console.log("Update")
+  await updateDoc(postRef, {
+    title: title.value,
+    text: text.value
+  });
+  console.log("Update")
 
-    })
+})
 
-  
+
 
 
